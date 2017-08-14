@@ -1,5 +1,5 @@
 /**
- * Netatmo Connect Date: 05.08.2017
+ * Netatmo Connect Date: 12.08.2017
  */
 
 import java.text.DecimalFormat
@@ -480,6 +480,7 @@ def listDevices() {
             input "pressUnits", "enum", title: "Pressure Units", description: "Please select pressure units", required: true, options: [mbar:'mbar', inhg:'inhg']            
             input "windUnits", "enum", title: "Wind Units", description: "Please select wind units", required: true, options: [kph:'kph', ms:'ms', mph:'mph', kts:'kts']
             input "time", "enum", title: "Time Format", description: "Please select time format", required: true, options: [12:'12 Hour', 24:'24 Hour']
+            input "sound", "number", title: "Sound Sensor: \nEnter the value when sound will be marked as detected", description: "Please enter number", required: false
         }
 	}
 }
@@ -538,6 +539,7 @@ def poll() {
                 child?.sendEvent(name: 'temp_trend', value: data['temp_trend'], unit: "")                
                 child?.sendEvent(name: 'pressure', value: (pressToPref(data['Pressure'])).toDouble().trunc(2), unit: settings.pressUnits)
 				child?.sendEvent(name: 'soundPressureLevel', value: data['Noise'], unit: "db")
+                child?.sendEvent(name: 'sound', value: noiseTosound(data['Noise']))
                 child?.sendEvent(name: 'pressure_trend', value: data['pressure_trend'], unit: "")
                 child?.sendEvent(name: 'min_temp', value: cToPref(data['min_temp']) as float, unit: getTemperatureScale())
                 child?.sendEvent(name: 'max_temp', value: cToPref(data['max_temp']) as float, unit: getTemperatureScale())
@@ -712,6 +714,14 @@ def gustTotext(GustAngle) {
     	return GustAngle + "° NWest"
     } else if (GustAngle < 361) {
     	return GustAngle + "° North"
+    }
+}
+
+def noiseTosound(Noise) {
+	if(Noise > settings.sound) { 
+    	return "detected"
+    } else {
+    	return "not detected"
     }
 }
 
