@@ -1,5 +1,5 @@
 /**
- *  netatmo-basestation Date: 10.07.2017
+ *  netatmo-basestation Date: 12.07.2017
  *
  *  Copyright 2014 Brian Steere
  *
@@ -23,6 +23,7 @@ metadata {
         capability "Sensor"
         capability "Carbon Dioxide Measurement"
         capability "Sound Pressure Level"
+        capability "Sound Sensor"
         capability "Refresh"
 
 		attribute "pressure", "number"
@@ -92,9 +93,13 @@ metadata {
                 [value: 1000, color: "#e86d13"]
  				]
  		}
- 		valueTile("soundPressureLevel", "device.soundPressureLevel", width: 2, height: 2, inactiveLabel: false) {
+ 		valueTile("soundPressureLevel", "device.soundPressureLevel", width: 2, height: 1, inactiveLabel: false) {
  			state "soundPressureLevel", label:'${currentValue}db'
  		}
+ 		valueTile("sound", "device.sound", width: 2, height: 1, inactiveLabel: false) {
+ 			state "not detected", label:'Quiet'
+            state "detected", label:'Sound detected'
+ 		}        
  		valueTile("pressure", "device.pressure", width: 2, height: 1, inactiveLabel: false) {
  			state "pressure", label:'${currentValue}'
  		}
@@ -115,7 +120,7 @@ metadata {
  		}
         
         main(["main"])
- 		details(["main","min_temp","date_min_temp","carbonDioxide", "max_temp","date_max_temp", "temp_trend", "soundPressureLevel", "pressure", "units", "pressure_trend", "refresh", "lastupdate"])
+ 		details(["main","min_temp","date_min_temp","carbonDioxide", "max_temp","date_max_temp", "temp_trend", "soundPressureLevel", "pressure", "units","sound", "pressure_trend", "refresh", "lastupdate"])
 	}
 }
 
