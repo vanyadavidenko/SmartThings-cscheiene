@@ -1,5 +1,5 @@
 /**
- *  netatmo-basestation Date: 12.07.2017
+ *  netatmo-basestation Date: 14.10.2017
  *
  *  Copyright 2014 Brian Steere
  *
@@ -25,6 +25,7 @@ metadata {
         capability "Sound Pressure Level"
         capability "Sound Sensor"
         capability "Refresh"
+        capability "Thermostat"
 
 		attribute "pressure", "number"
         attribute "min_temp", "number"
@@ -96,9 +97,9 @@ metadata {
  		valueTile("soundPressureLevel", "device.soundPressureLevel", width: 2, height: 1, inactiveLabel: false) {
  			state "soundPressureLevel", label:'${currentValue}db'
  		}
- 		valueTile("sound", "device.sound", width: 2, height: 1, inactiveLabel: false) {
- 			state "not detected", label:'Quiet'
-            state "detected", label:'Sound detected'
+ 		standardTile("sound", "device.sound", width: 2, height: 1, inactiveLabel: false) {
+ 			state "not detected", label:'Quiet', icon: "st.Entertainment.entertainment15"
+            state "detected", label:'Sound detected', icon: "st.Entertainment.entertainment15"
  		}        
  		valueTile("pressure", "device.pressure", width: 2, height: 1, inactiveLabel: false) {
  			state "pressure", label:'${currentValue}'
@@ -120,7 +121,7 @@ metadata {
  		}
         
         main(["main"])
- 		details(["main","min_temp","date_min_temp","carbonDioxide", "max_temp","date_max_temp", "temp_trend", "soundPressureLevel", "pressure", "units","sound", "pressure_trend", "refresh", "lastupdate"])
+ 		details(["main","min_temp","date_min_temp","carbonDioxide", "max_temp","date_max_temp", "temp_trend","sound", "pressure", "units", "soundPressureLevel", "pressure_trend", "refresh", "lastupdate"])
 	}
 }
 
