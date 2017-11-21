@@ -1,5 +1,5 @@
 /**
- * Netatmo Connect Date: 12.08.2017
+ * Netatmo Connect Date: 21.11.2017
  */
 
 import java.text.DecimalFormat
@@ -70,18 +70,18 @@ def authPage() {
 		}
 
 		if (!oauthTokenProvided) {
-			log.debug "Show the login page"
+			log.debug "Showing the login page"
 			return dynamicPage(name: "Credentials", title: "Authorize Connection", nextPage:"listDevices", uninstall: uninstallAllowed, install:false) {
 				section() {
-					paragraph "Tap below to log in to the netatmo and authorize SmartThings access."
+					paragraph "Tap below to log in to Netatmo and authorize SmartThings access."
 					href url:redirectUrl, style:"embedded", required:false, title:"Connect to ${getVendorName()}:", description:description
 				}
 			}
 		} else {
-			log.debug "Show the devices page"
-			return dynamicPage(name: "Credentials", title: "Credentials Accepted!", nextPage:"listDevices", uninstall: uninstallAllowed, install:false) {
+			log.debug "Showing the devices page"
+			return dynamicPage(name: "Credentials", title: "Connected", nextPage:"listDevices", uninstall: uninstallAllowed, install:false) {
 				section() {
-					input(name:"Devices", style:"embedded", required:false, title:"${getVendorName()} is now connected to SmartThings!", description:description) 
+					input(name:"Devices", style:"embedded", required:false, title:"Netatmo is now connected to SmartThings!", description:description) 
 				}
 			}
 		}
@@ -174,7 +174,7 @@ def callback() {
 }
 
 def success() {
-	log.debug "in success"
+	log.debug "OAuth flow succeeded"
 	def message = """
 	<p>We have located your """ + getVendorName() + """ account.</p>
 	<p>Tap 'Done' to continue to Devices.</p>
@@ -183,7 +183,7 @@ def success() {
 }
 
 def fail() {
-	log.debug "in fail"
+	log.debug "OAuth flow failed"
 	def message = """
 	<p>The connection could not be established!</p>
 	<p>Click 'Done' to return to the menu.</p>
@@ -466,7 +466,7 @@ def createChildDevice(deviceFile, dni, name, label) {
 }
 
 def listDevices() {
-	log.debug "In listDevices"
+	log.debug "Listing devices"
 
 	def devices = getDeviceList()
 
