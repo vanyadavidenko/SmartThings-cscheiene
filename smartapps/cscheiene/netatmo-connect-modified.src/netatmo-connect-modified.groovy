@@ -522,14 +522,14 @@ def poll() {
 	log.debug "Polling"
 	getDeviceList();
 	def children = getChildDevices()
-    //log.debug "State: ${state.deviceState}"
+    log.debug "State: ${state.deviceState}"
 
 	settings.devices.each { deviceId ->
 		def detail = state?.deviceDetail[deviceId]
 		def data = state?.deviceState[deviceId]
 		def child = children?.find { it.deviceNetworkId == deviceId }
 
-		//log.debug "Update: $child";
+		log.debug "Update: $child";
 		switch(detail?.type) {
 			case 'NAMain':
 				log.debug "Updating NAMain $data"
