@@ -525,7 +525,7 @@ def poll() {
     //log.debug "State: ${state.deviceState}"
     //log.debug "Time Zone: ${location.timeZone}"
     
-    if(location.timeZone == 'null')
+    if(location.timeZone == null)
        log.warn "Location is not set! Go to your ST app and set your location"
 
 	settings.devices.each { deviceId ->
