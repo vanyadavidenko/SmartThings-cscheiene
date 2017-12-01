@@ -1,5 +1,5 @@
 /**
- * Netatmo Connect Date: 21.11.2017
+ * Netatmo Connect Date: 01.12.2017
  */
 
 import java.text.DecimalFormat
@@ -522,17 +522,21 @@ def poll() {
 	log.debug "Polling"
 	getDeviceList();
 	def children = getChildDevices()
-    log.debug "State: ${state.deviceState}"
+    //log.debug "State: ${state.deviceState}"
+    //log.debug "Time Zone: ${location.timeZone}"
+    
+    if(location.timeZone == 'null')
+       log.warn "Location is not set! Go to your ST app and set your location"
 
 	settings.devices.each { deviceId ->
 		def detail = state?.deviceDetail[deviceId]
 		def data = state?.deviceState[deviceId]
 		def child = children?.find { it.deviceNetworkId == deviceId }
 
-		log.debug "Update: $child";
+		//log.debug "Update: $child";
 		switch(detail?.type) {
 			case 'NAMain':
-				log.debug "Updating NAMain $data"
+				log.debug "Updating Basestation $data"
 				child?.sendEvent(name: 'temperature', value: cToPref(data['Temperature']) as float, unit: getTemperatureScale())
 				child?.sendEvent(name: 'carbonDioxide', value: data['CO2'], unit: "ppm")
 				child?.sendEvent(name: 'humidity', value: data['Humidity'], unit: "%")
@@ -549,7 +553,7 @@ def poll() {
                 child?.sendEvent(name: 'date_max_temp', value: lastUpdated(data['date_max_temp']), unit: "")
 				break;
 			case 'NAModule1':
-				log.debug "Updating NAModule1 $data"
+				log.debug "Updating Outdoor Module $data"
 				child?.sendEvent(name: 'temperature', value: cToPref(data['Temperature']) as float, unit: getTemperatureScale())
 				child?.sendEvent(name: 'humidity', value: data['Humidity'], unit: "%")
                 child?.sendEvent(name: 'temp_trend', value: data['temp_trend'], unit: "")
@@ -561,7 +565,7 @@ def poll() {
                 child?.sendEvent(name: 'date_max_temp', value: lastUpdated(data['date_max_temp']), unit: "")
 				break;
 			case 'NAModule3':
-				log.debug "Updating NAModule3 $data"
+				log.debug "Updating Rain Module $data"
 				child?.sendEvent(name: 'rain', value: (rainToPref(data['Rain'])), unit: settings.rainUnits)
 				child?.sendEvent(name: 'rainSumHour', value: (rainToPref(data['sum_rain_1'])), unit: settings.rainUnits)
 				child?.sendEvent(name: 'rainSumDay', value: (rainToPref(data['sum_rain_24'])), unit: settings.rainUnits)
@@ -573,7 +577,7 @@ def poll() {
 				child?.sendEvent(name: 'rainSumDayUnits', value: rainToPrefUnits(data['sum_rain_24']), displayed: false)                
 				break;
 			case 'NAModule4':
-				log.debug "Updating NAModule4 $data"
+				log.debug "Updating Additional Module $data"
 				child?.sendEvent(name: 'temperature', value: cToPref(data['Temperature']) as float, unit: getTemperatureScale())
 				child?.sendEvent(name: 'carbonDioxide', value: data['CO2'], unit: "ppm")
 				child?.sendEvent(name: 'humidity', value: data['Humidity'], unit: "%")
@@ -586,7 +590,7 @@ def poll() {
                 child?.sendEvent(name: 'date_max_temp', value: lastUpdated(data['date_max_temp']), unit: "")
 				break;
             case 'NAModule2':
-				log.debug "Updating NAModule2 $data"
+				log.debug "Updating Wind Module $data"
 				child?.sendEvent(name: 'WindAngle', value: data['WindAngle'], unit: "°", displayed: false)
                 child?.sendEvent(name: 'GustAngle', value: data['GustAngle'], unit: "°", displayed: false)
                 child?.sendEvent(name: 'battery', value: detail['battery_percent'], unit: "%")
