@@ -526,7 +526,7 @@ def poll() {
     //log.debug "Time Zone: ${location.timeZone}"
     
     if(location.timeZone == null)
-       log.warn "Location is not set! Go to your ST app and set your location"
+		sendPush("Location is not set! Go to your ST app and set your location!")    
 
 	settings.devices.each { deviceId ->
 		def detail = state?.deviceDetail[deviceId]
@@ -666,11 +666,13 @@ def windToPrefUnits(Wind) {
     }
 }
 def lastUpdated(time) {
-    if(settings.time == '24') {
+	if(location.timeZone == null) {
+    	log.warn "Location is not set! Go to your ST app and set your location!"
+    } else if(settings.time == '24') {
     def updtTime = new Date(time*1000L).format("HH:mm", location.timeZone)
     state.lastUpdated = updtTime
     return updtTime
-    } else {
+    } else if(settings.time == '12') {
     def updtTime = new Date(time*1000L).format("h:mm aa", location.timeZone)
     state.lastUpdated = updtTime
     return updtTime
