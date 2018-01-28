@@ -373,6 +373,8 @@ def initialize() {
 	log.debug "Delete: $delete"
 	delete.each { deleteChildDevice(it.deviceNetworkId) }
 
+	// check if user has set location
+    checkloc()
 	// Do the initial poll
 	poll()
 	// Schedule it to run every 5 minutes
@@ -524,9 +526,7 @@ def poll() {
 	def children = getChildDevices()
     //log.debug "State: ${state.deviceState}"
     //log.debug "Time Zone: ${location.timeZone}"
-    
-    if(location.timeZone == null)
-		sendPush("Location is not set! Go to your ST app and set your location!")    
+     
 
 	settings.devices.each { deviceId ->
 		def detail = state?.deviceDetail[deviceId]
@@ -667,14 +667,17 @@ def windToPrefUnits(Wind) {
 }
 def lastUpdated(time) {
 	if(location.timeZone == null) {
-    	log.warn "Location is not set! Go to your ST app and set your location!"
+    log.warn "Time Zone is not set, time will be in UTC. Go to your ST app and set your hub location to get local time!"    
+    	def updtTime = new Date(time*1000L).format("HH:mm")
+    	state.lastUpdated = updtTime
+    return updtTime + " UTC"   
     } else if(settings.time == '24') {
-    def updtTime = new Date(time*1000L).format("HH:mm", location.timeZone)
-    state.lastUpdated = updtTime
+    	def updtTime = new Date(time*1000L).format("HH:mm", location.timeZone)
+    	state.lastUpdated = updtTime
     return updtTime
     } else if(settings.time == '12') {
-    def updtTime = new Date(time*1000L).format("h:mm aa", location.timeZone)
-    state.lastUpdated = updtTime
+    	def updtTime = new Date(time*1000L).format("h:mm aa", location.timeZone)
+    	state.lastUpdated = updtTime
     return updtTime
     }
 }
@@ -730,6 +733,13 @@ def noiseTosound(Noise) {
     	return "not detected"
     }
 }
+
+def checkloc() {
+
+    if(location.timeZone == null)
+		sendPush("Netatmo: Time Zone is not set, time will be in UTC. Go to your ST app and set your hub location to get local time!")
+}        
+        
 
 def debugEvent(message, displayEvent) {
 
