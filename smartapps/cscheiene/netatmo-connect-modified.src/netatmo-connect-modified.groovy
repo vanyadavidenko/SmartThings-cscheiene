@@ -1,5 +1,5 @@
 /**
- * Netatmo Connect Date: 01.12.2017
+ * Netatmo Connect
  */
 
 import java.text.DecimalFormat
@@ -343,23 +343,23 @@ def initialize() {
 		try {
 			switch(detail?.type) {
 				case 'NAMain':
-					log.debug "Creating Base station"
+					log.debug "Creating Base station, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					createChildDevice("Netatmo Basestation", deviceId, "${detail.type}.${deviceId}", detail.module_name)
 					break
 				case 'NAModule1':
-					log.debug "Creating Outdoor module"
+					log.debug "Creating Outdoor module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					createChildDevice("Netatmo Outdoor Module", deviceId, "${detail.type}.${deviceId}", detail.module_name)
 					break
 				case 'NAModule3':
-					log.debug "Creating Rain Gauge"
+					log.debug "Creating Rain Gauge, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					createChildDevice("Netatmo Rain", deviceId, "${detail.type}.${deviceId}", detail.module_name)
 					break
 				case 'NAModule4':
-					log.debug "Creating Additional module"
+					log.debug "Creating Additional module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					createChildDevice("Netatmo Additional Module", deviceId, "${detail.type}.${deviceId}", detail.module_name)
 					break
                 case 'NAModule2':
-					log.debug "Creating Wind module"
+					log.debug "Creating Wind module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					createChildDevice("Netatmo Wind", deviceId, "${detail.type}.${deviceId}", detail.module_name)
 					break
 			}
@@ -468,7 +468,7 @@ def createChildDevice(deviceFile, dni, name, label) {
 }
 
 def listDevices() {
-	log.debug "Listing devices"
+	log.debug "Listing devices $devices "
 
 	def devices = getDeviceList()
 
