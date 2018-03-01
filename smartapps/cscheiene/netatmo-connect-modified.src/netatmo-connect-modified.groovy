@@ -147,26 +147,20 @@ def callback() {
 
 		// log.debug "PARAMS: ${params}"
 
-		try {
-            httpPost(params) { resp ->
+		httpPost(params) { resp ->
 
-                def slurper = new JsonSlurper()
+			def slurper = new JsonSlurper()
 
-                resp.data.each { key, value ->
-                    def data = slurper.parseText(key)
+			resp.data.each { key, value ->
+				def data = slurper.parseText(key)
 
-                    state.refreshToken = data.refresh_token
-                    state.authToken = data.access_token
-                    state.tokenExpires = now() + (data.expires_in * 1000)
-                    // log.debug "swapped token: $resp.data"
-                }
-            }
-        }
-        catch (e) {
-        	log.debug "Error in token handling $e.response.data}"
-        	//showAlert("Error retrieving token","token","token") 
+				state.refreshToken = data.refresh_token
+				state.authToken = data.access_token
+				state.tokenExpires = now() + (data.expires_in * 1000)
+				// log.debug "swapped token: $resp.data"
+			}
 		}
-        //Error in token handling [{"error":"invalid_request"}:null]} dd72fcfc-eadb-433a-a77f-3f13820d6962  4:38:32 PM: debug TOKEN URL: https://api.netatmo.com/oauth2/tokenclient_id=5a4f56358c04c4157f8b483b&client_secret=Pc1NPnYxPbmr5OrSOMF6XuBZMDn6ExRZDx7YD7eqo4&code=ed4961cdbbf58d9668f4cd907c8e6106&grant_type=authorization_code&redirect_uri=https%3A%2F%2Fgraph.api.smartthings.com%2F%2Foauth%2Fcallback&scope=read_camera+read_presence
+
 		// Handle success and failure here, and render stuff accordingly
 		if (state.authToken) {
 			success()
@@ -494,50 +488,32 @@ def listDevices() {
 }
 
 def apiGet(String path, Map query, Closure callback) {
-	
-    if (!state.accessToken || now() >= state.tokenExpires) {
-    	refreshToken()
-    }
-    query['access_token'] = state.accessToken
+	if(now() >= state.tokenExpires) {
+		refreshToken();
+	}
+
+	query['access_token'] = state.accessToken
 	def params = [
 		uri: getApiUrl(),
 		path: path,
 		'query': query
 	]
-	log.debug "API Get: $params"
+	// log.debug "API Get: $params"
 
 	try {
 		httpGet(params)	{ response ->
-        	log.debug "apiGet response status $response.status"
 			callback.call(response)
 		}
+	} catch (Exception e) {
+		// This is most likely due to an invalid token. Try to refresh it and try again.
+		log.debug "apiGet: Call failed $e"
+		if(refreshToken()) {
+			log.debug "apiGet: Trying again after refreshing token"
+			httpGet(params)	{ response ->
+				callback.call(response)
+			}
+		}
 	}
-    catch (groovyx.net.http.HttpResponseException e) {
-    	def status = e.response.status
-        if (status == 403) {
-        	// token has probably expired, trying refresh before reporting error
-            if(refreshToken()) 
-            {
-            	try {
-                    httpGet(params)	{ response ->
-                        callback.call(response)
-                    }
-                }
-                catch (groovyx.net.http.HttpResponseException ex) {
-                	//still no succes..
-                    callback.call(response)
-                }
-            }
-            else {
-        		log.debug "Token refresh failed"
-                callback.call(response)
-        	}
-      	}
-        showAlert("Netatmo api error: $status\n" + e.response.data.error.message,"error","netatmo")
-        callback.call(response)
-    	
-	}
-
 }
 
 def apiGet(String path, Closure callback) {
