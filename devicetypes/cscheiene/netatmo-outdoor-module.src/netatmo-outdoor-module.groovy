@@ -1,5 +1,5 @@
 /**
- *  netatmo-outdoor Date: 14.10.2017
+ *  netatmo-outdoor Date: 28.06.2018
  *
  *  Copyright 2014 Brian Steere
  *
@@ -15,13 +15,14 @@
  *  Based on Brian Steere's netatmo-outdoor DTH
  */
 metadata {
-    definition(name: "Netatmo Outdoor Module", namespace: "cscheiene", author: "Brian Steere,cscheiene") {
+    definition(name: "Netatmo Outdoor Module", namespace: "cscheiene", author: "Brian Steere,cscheiene,Vanya Davidenko") {
         capability "Relative Humidity Measurement"
         capability "Temperature Measurement"
-        capability "Sensor"
-        capability "Battery"
         capability "Refresh"
         capability "Thermostat"
+
+        capability "Sensor"
+        capability "Battery"
 
         attribute "min_temp", "number"
         attribute "max_temp", "number"
@@ -39,6 +40,7 @@ metadata {
     }
 
     tiles(scale: 2) {
+// TEMP-DTH SHARED CODE
         multiAttributeTile(name: "main", type: "generic", width: 6, height: 4) {
             tileAttribute("temperature", key: "PRIMARY_CONTROL") {
                 attributeState "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
@@ -52,29 +54,11 @@ metadata {
                 ]
             }
             tileAttribute("humidity", key: "SECONDARY_CONTROL") {
-                attributeState "humidity", label: 'Humidity: ${currentValue}%'
+                attributeState "humidity", label: '                                                     Humidity: ${currentValue}%'
             }
         }
-        valueTile("min_temp", "min_temp", width: 2, height: 1) {
-             state "min_temp", label: 'Min: ${currentValue}°'
-        }
-        valueTile("max_temp", "max_temp", width: 2, height: 1) {
-             state "max_temp", label: 'Max: ${currentValue}°'
-        }
-        valueTile("temp_trend", "temp_trend", width: 4, height: 1) {
-             state "temp_trend", label: 'Temp Trend: ${currentValue}'
-        }
-        valueTile("battery", "device.battery", inactiveLabel: false, width: 2, height: 2) {
-            state "battery_percent", label: 'Battery: ${currentValue}%', unit: "", backgroundColors: [
-                [value: 20, color: "#ff0000"],
-                [value: 35, color: "#fd4e3a"],
-                [value: 50, color: "#fda63a"],
-                [value: 60, color: "#fdeb3a"],
-                [value: 75, color: "#d4fd3a"],
-                [value: 90, color: "#7cfd3a"],
-                [value: 99, color: "#55fd3a"]
-            ]
-        }
+
+// SHARED CODE
         valueTile("temperature", "device.temperature") {
              state "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
                  [value: 31, color: "#153591"],
@@ -86,8 +70,11 @@ metadata {
                  [value: 96, color: "#bc2323"]
              ]
         }
-        valueTile("lastupdate", "lastupdate", width: 4, height: 1, inactiveLabel: false) {
-            state "default", label: "Last updated: " + '${currentValue}'
+        valueTile("min_temp", "min_temp", width: 2, height: 1) {
+            state "min_temp", label: 'Min: ${currentValue}°'
+        }
+        valueTile("max_temp", "max_temp", width: 2, height: 1) {
+            state "max_temp", label: 'Max: ${currentValue}°'
         }
         valueTile("date_min_temp", "date_min_temp", width: 2, height: 1, inactiveLabel: false) {
             state "default", label: '${currentValue}'
@@ -95,11 +82,34 @@ metadata {
         valueTile("date_max_temp", "date_max_temp", width: 2, height: 1, inactiveLabel: false) {
             state "default", label: '${currentValue}'
         }
+        valueTile("temp_trend", "temp_trend", width: 4, height: 1) {
+            state "temp_trend", label: 'Temp Trend: ${currentValue}'
+        }
+        valueTile("humidity", "device.humidity", inactiveLabel: false) {
+            state "humidity", label: '${currentValue}%'
+        }
+        valueTile("lastupdate", "lastupdate", width: 4, height: 1, inactiveLabel: false) {
+            state "default", label: "Last updated: " + '${currentValue}'
+        }
         standardTile("refresh", "device.refresh", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
             state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
         }
+
+// PARTIALLY SHARED CODE
+        valueTile("battery", "device.battery", inactiveLabel: false, width: 2, height: 2) {
+            state "battery_percent", label: 'Battery: ${currentValue}%', unit: "", backgroundColors: [
+                [value: 20, color: "#ff0000"],
+                [value: 35, color: "#fd4e3a"],
+                [value: 50, color: "#fda63a"],
+                [value: 60, color: "#fdeb3a"],
+                [value: 75, color: "#d4fd3a"],
+                [value: 90, color: "#7cfd3a"],
+                [value: 99, color: "#55fd3a"]
+            ]
+        }
+
         main(["main"])
-        details(["main", "min_temp", "date_min_temp", "battery", "max_temp", "date_max_temp", "temp_trend", "lastupdate", "refresh"])
+        details(["main", "min_temp", "max_temp", "battery", "date_min_temp", "date_max_temp", "temp_trend", "lastupdate", "refresh"])
     }
 }
 

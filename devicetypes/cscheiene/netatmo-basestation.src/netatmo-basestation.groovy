@@ -1,5 +1,5 @@
 /**
- *  netatmo-basestation Date: 14.10.2017
+ *  netatmo-basestation Date: 28.06.2018
  *
  *  Copyright 2014 Brian Steere
  *
@@ -15,22 +15,24 @@
  * Based on Brian Steere's netatmo-basestation DTH
  */
 metadata {
-    definition(name: "Netatmo Basestation", namespace: "cscheiene", author: "Brian Steere,cscheiene") {
+    definition(name: "Netatmo Basestation", namespace: "cscheiene", author: "Brian Steere,cscheiene,Vanya Davidenko") {
         capability "Relative Humidity Measurement"
         capability "Temperature Measurement"
         capability "Sensor"
-        capability "Carbon Dioxide Measurement"
-        capability "Sound Pressure Level"
-        capability "Sound Sensor"
         capability "Refresh"
         capability "Thermostat"
 
-        attribute "pressure", "number"
+        capability "Carbon Dioxide Measurement"
+        capability "Sound Pressure Level"
+        capability "Sound Sensor"
+
         attribute "min_temp", "number"
         attribute "max_temp", "number"
         attribute "temp_trend", "string"
-        attribute "pressure_trend", "string"
         attribute "lastupdate", "string"
+
+        attribute "pressure", "number"
+        attribute "pressure_trend", "string"
     }
 
     simulator {
@@ -43,6 +45,7 @@ metadata {
     }
 
     tiles(scale: 2) {
+// TEMP-DTH SHARED CODE
         multiAttributeTile(name: "main", type: "generic", width: 6, height: 4) {
             tileAttribute("temperature", key: "PRIMARY_CONTROL") {
                 attributeState "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
@@ -55,10 +58,15 @@ metadata {
                     [value: 98, color: "#bc2323"]
                 ]
             }
+            tileAttribute("carbonDioxide", key: "SECONDARY_CONTROL") {
+                attributeState "carbonDioxide", label: 'CO2: ${currentValue}ppm'
+            }
             tileAttribute("humidity", key: "SECONDARY_CONTROL") {
-                attributeState "humidity", label: 'Humidity: ${currentValue}%'
+                attributeState "humidity", label: '                                                     Humidity: ${currentValue}%'
             }
         }
+
+// SHARED CODE
         valueTile("temperature", "device.temperature") {
              state "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
                  [value: 31, color: "#153591"],
@@ -76,21 +84,43 @@ metadata {
         valueTile("max_temp", "max_temp", width: 2, height: 1) {
             state "max_temp", label: 'Max: ${currentValue}°'
         }
-        valueTile("humidity", "device.humidity", inactiveLabel: false) {
-            state "humidity", label: '${currentValue}%'
+        valueTile("date_min_temp", "date_min_temp", width: 2, height: 1, inactiveLabel: false) {
+            state "default", label: '${currentValue}'
+        }
+        valueTile("date_max_temp", "date_max_temp", width: 2, height: 1, inactiveLabel: false) {
+            state "default", label: '${currentValue}'
         }
         valueTile("temp_trend", "temp_trend", width: 4, height: 1) {
             state "temp_trend", label: 'Temp Trend: ${currentValue}'
         }
-        valueTile("pressure_trend", "pressure_trend", width: 4, height: 1) {
-            state "pressure_trend", label: 'Press Trend: ${currentValue}'
+        valueTile("humidity", "device.humidity", inactiveLabel: false) {
+            state "humidity", label: '${currentValue}%'
         }
+        valueTile("lastupdate", "lastupdate", width: 4, height: 1, inactiveLabel: false) {
+            state "default", label: "Last updated: " + '${currentValue}'
+        }
+        standardTile("refresh", "device.refresh", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+            state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
+        }
+
+// PARTIALLY SHARED CODE
         valueTile("carbonDioxide", "device.carbonDioxide", width: 2, height: 2, inactiveLabel: false) {
             state "carbonDioxide", label: '${currentValue}ppm', backgroundColors: [
                 [value: 600, color: "#44B621"],
                 [value: 999, color: "#ffcc00"],
                 [value: 1000, color: "#e86d13"]
             ]
+        }
+
+// DEVICE-SPECIFIC CODE
+        valueTile("pressure", "device.pressure", width: 2, height: 1, inactiveLabel: false) {
+            state "pressure", label: '${currentValue}'
+        }
+        valueTile("pressure_trend", "pressure_trend", width: 2, height: 1) {
+            state "pressure_trend", label: 'Press Trend: ${currentValue}'
+        }
+        valueTile("units", "units", width: 2, height: 1, inactiveLabel: false) {
+            state "default", label: '${currentValue}'
         }
         valueTile("soundPressureLevel", "device.soundPressureLevel", width: 2, height: 1, inactiveLabel: false) {
             state "soundPressureLevel", label: '${currentValue}db'
@@ -99,27 +129,9 @@ metadata {
             state "not detected", label: 'Quiet', icon: "st.Entertainment.entertainment15"
             state "detected", label: 'Sound detected', icon: "st.Entertainment.entertainment15"
         }
-        valueTile("pressure", "device.pressure", width: 2, height: 1, inactiveLabel: false) {
-            state "pressure", label: '${currentValue}'
-        }
-        valueTile("units", "units", width: 2, height: 1, inactiveLabel: false) {
-            state "default", label: '${currentValue}'
-        }
-        valueTile("lastupdate", "lastupdate", width: 4, height: 1, inactiveLabel: false) {
-            state "default", label: "Last updated: " + '${currentValue}'
-        }
-        valueTile("date_min_temp", "date_min_temp", width: 2, height: 1, inactiveLabel: false) {
-            state "default", label: '${currentValue}'
-        }
-        valueTile("date_max_temp", "date_max_temp", width: 2, height: 1, inactiveLabel: false) {
-            state "default", label: '${currentValue}'
-        }
-        standardTile("refresh", "device.refresh", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
-            state "default", action: "refresh.refresh", icon: "st.secondary.refresh"
-        }
 
         main(["main"])
-        details(["main", "min_temp", "date_min_temp", "carbonDioxide", "max_temp", "date_max_temp", "temp_trend", "sound", "pressure", "units", "soundPressureLevel", "pressure_trend", "refresh", "lastupdate"])
+        details(["main", "min_temp", "max_temp", "pressure", "date_min_temp", "date_max_temp", "units", "temp_trend", "pressure_trend", "sound", "soundPressureLevel", "lastupdate", "refresh"])
     }
 }
 
