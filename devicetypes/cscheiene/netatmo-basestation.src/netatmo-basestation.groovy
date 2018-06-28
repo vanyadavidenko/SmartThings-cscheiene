@@ -49,13 +49,19 @@ metadata {
         multiAttributeTile(name: "main", type: "generic", width: 6, height: 4) {
             tileAttribute("temperature", key: "PRIMARY_CONTROL") {
                 attributeState "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
-                    [value: 32, color: "#153591"],
+                    [value: 0, color: "#153591"],
+                    [value: 5, color: "#1e9cbb"],
+                    [value: 10, color: "#90d2a7"],
+                    [value: 15, color: "#44b621"],
+                    [value: 20, color: "#f1d801"],
+                    [value: 25, color: "#d04e00"],
+                    [value: 30, color: "#bc2323"],
                     [value: 44, color: "#1e9cbb"],
                     [value: 59, color: "#90d2a7"],
                     [value: 74, color: "#44b621"],
                     [value: 84, color: "#f1d801"],
-                    [value: 92, color: "#d04e00"],
-                    [value: 98, color: "#bc2323"]
+                    [value: 95, color: "#d04e00"],
+                    [value: 96, color: "#bc2323"]
                 ]
             }
             tileAttribute("carbonDioxide", key: "SECONDARY_CONTROL") {
@@ -69,7 +75,13 @@ metadata {
 // SHARED CODE
         valueTile("temperature", "device.temperature") {
              state "temperature", label: '${currentValue}°', icon: "st.Weather.weather2", backgroundColors: [
-                 [value: 31, color: "#153591"],
+                 [value: 0, color: "#153591"],
+                 [value: 5, color: "#1e9cbb"],
+                 [value: 10, color: "#90d2a7"],
+                 [value: 15, color: "#44b621"],
+                 [value: 20, color: "#f1d801"],
+                 [value: 25, color: "#d04e00"],
+                 [value: 30, color: "#bc2323"],
                  [value: 44, color: "#1e9cbb"],
                  [value: 59, color: "#90d2a7"],
                  [value: 74, color: "#44b621"],
@@ -106,9 +118,9 @@ metadata {
 // PARTIALLY SHARED CODE
         valueTile("carbonDioxide", "device.carbonDioxide", width: 2, height: 2, inactiveLabel: false) {
             state "carbonDioxide", label: '${currentValue}ppm', backgroundColors: [
-                [value: 600, color: "#44B621"],
-                [value: 999, color: "#ffcc00"],
-                [value: 1000, color: "#e86d13"]
+                [value: 750, color: "#44B621"],
+                [value: 1000, color: "#ffcc00"],
+                [value: 1500, color: "#e86d13"]
             ]
         }
 
