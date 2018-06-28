@@ -16,12 +16,13 @@ private getServerUrl() 		{ appSettings.serverUrl }
 private getShardUrl()		{ return getApiServerUrl() }
 private getCallbackUrl()	{ "${serverUrl}/oauth/callback" }
 private getBuildRedirectUrl() { "${serverUrl}/oauth/initialize?appId=${app.id}&access_token=${state.accessToken}&apiServerUrl=${shardUrl}" }
+private getOriginalDeviceId(String deviceId) { return deviceId.replaceAll(/\.clone\..*$/, ""); }
 
 // Automatically generated. Make future change here.
 definition(
-	name: "Netatmo (Connect) Modified",
+	name: "Netatmo (Connect) Modified With Extra CO2 device",
 	namespace: "cscheiene",
-	author: "Brian Steere,cscheiene",
+	author: "Brian Steere,cscheiene,Vanya Davidenko",
 	description: "Netatmo Integration",
 	category: "SmartThings Labs",
 	iconUrl: "https://s3.amazonaws.com/smartapp-icons/Partner/netamo-icon-1.png",
@@ -336,6 +337,8 @@ def initialize() {
 	// Pull the latest device info into state
 	getDeviceList();
 
+	def knownChildren = []
+
 	settings.devices.each {
 		def deviceId = it
 		def detail = state?.deviceDetail[deviceId]
@@ -344,23 +347,30 @@ def initialize() {
 			switch(detail?.type) {
 				case 'NAMain':
 					log.debug "Creating Base station, DeviceID: ${deviceId} Device name: ${detail.module_name}"
-					createChildDevice("Netatmo Basestation", deviceId, "${detail.type}.${deviceId}", detail.module_name)
+					knownChildren.add(createChildDevice("Netatmo Basestation", deviceId, "${detail.type}.${deviceId} Temp", detail.module_name))
+					if (settings.addExtraVirtualCo2Devices) {
+						knownChildren.add(createChildDevice("Netatmo Basestation CO2", "${deviceId}.clone.co2", "${detail.type}.${deviceId} CO2", detail.module_name))
+//					    knownChildren.add(createChildDevice("Netatmo Basestation Pressure", "${deviceId}.clone.pressure", "${detail.type}.${deviceId} Pressure", detail.module_name))
+					}
 					break
 				case 'NAModule1':
 					log.debug "Creating Outdoor module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
-					createChildDevice("Netatmo Outdoor Module", deviceId, "${detail.type}.${deviceId}", detail.module_name)
+					knownChildren.add(createChildDevice("Netatmo Outdoor Module", deviceId, "${detail.type}.${deviceId}", detail.module_name))
 					break
 				case 'NAModule3':
 					log.debug "Creating Rain Gauge, DeviceID: ${deviceId} Device name: ${detail.module_name}"
-					createChildDevice("Netatmo Rain", deviceId, "${detail.type}.${deviceId}", detail.module_name)
+					knownChildren.add(createChildDevice("Netatmo Rain", deviceId, "${detail.type}.${deviceId}", detail.module_name))
 					break
 				case 'NAModule4':
 					log.debug "Creating Additional module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
-					createChildDevice("Netatmo Additional Module", deviceId, "${detail.type}.${deviceId}", detail.module_name)
+					knownChildren.add(createChildDevice("Netatmo Additional Module", "${deviceId}", "${detail.type}.${deviceId}", detail.module_name))
+					if (settings.addExtraVirtualCo2Devices) {
+						knownChildren.add(createChildDevice("Netatmo Additional Module CO2", "${deviceId}.clone.co2", "${detail.type}.${deviceId} CO2", detail.module_name))
+					}
 					break
                 case 'NAModule2':
 					log.debug "Creating Wind module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
-					createChildDevice("Netatmo Wind", deviceId, "${detail.type}.${deviceId}", detail.module_name)
+					knownChildren.add(createChildDevice("Netatmo Wind", deviceId, "${detail.type}.${deviceId}", detail.module_name))
 					break
 			}
 		} catch (Exception e) {
@@ -369,7 +379,7 @@ def initialize() {
 	}
 
 	// Cleanup any other devices that need to go away
-	def delete = getChildDevices().findAll { !settings.devices.contains(it.deviceNetworkId) }
+	def delete = getChildDevices().findAll { !knownChildren.contains(it.deviceNetworkId) }
 	log.debug "Delete: $delete"
 	delete.each { deleteChildDevice(it.deviceNetworkId) }
 
@@ -465,6 +475,8 @@ def createChildDevice(deviceFile, dni, name, label) {
 	} catch (e) {
 		log.error "Error creating device: ${e}"
 	}
+
+    return dni.toString()
 }
 
 def listDevices() {
@@ -479,10 +491,11 @@ def listDevices() {
 
         section("Preferences") {
         	input "rainUnits", "enum", title: "Rain Units", description: "Please select rain units", required: true, options: [mm:'Millimeters', in:'Inches']
-            input "pressUnits", "enum", title: "Pressure Units", description: "Please select pressure units", required: true, options: [mbar:'mbar', inhg:'inhg']            
+            input "pressUnits", "enum", title: "Pressure Units", description: "Please select pressure units", required: true, options: [mbar:'mbar', inhg:'inhg', mmhg:'mmhg']
             input "windUnits", "enum", title: "Wind Units", description: "Please select wind units", required: true, options: [kph:'kph', ms:'ms', mph:'mph', kts:'kts']
             input "time", "enum", title: "Time Format", description: "Please select time format", required: true, options: [12:'12 Hour', 24:'24 Hour']
             input "sound", "number", title: "Sound Sensor: \nEnter the value when sound will be marked as detected", description: "Please enter number", required: false
+            input "addExtraVirtualCo2Devices", "bool", title: "Add extra virtual devices with CO2 as primary control", required: false
         }
 	}
 }
@@ -531,9 +544,10 @@ def poll() {
 	settings.devices.each { deviceId ->
 		def detail = state?.deviceDetail[deviceId]
 		def data = state?.deviceState[deviceId]
-		def child = children?.find { it.deviceNetworkId == deviceId }
+		def child_list = children?.findAll { getOriginalDeviceId(it.deviceNetworkId) == deviceId }
 
 		//log.debug "Update: $child";
+        for ( child in child_list ) {
 		switch(detail?.type) {
 			case 'NAMain':
 				log.debug "Updating Basestation $data"
@@ -607,6 +621,7 @@ def poll() {
                 child?.sendEvent(name: 'max_wind_strUnits', value: windToPrefUnits(data['max_wind_str']), displayed: false)               
                 break;
 		}
+        }
 	}
 }
 
@@ -637,8 +652,10 @@ def rainToPrefUnits(rain) {
 def pressToPref(Pressure) {
 	if(settings.pressUnits == 'mbar') {
     	return Pressure
-    } else {
+    } else if(settings.pressUnits == 'inhg') {
     	return Pressure * 0.029530
+    } else {
+    	return Pressure * 0.750062
     }
 }
 
