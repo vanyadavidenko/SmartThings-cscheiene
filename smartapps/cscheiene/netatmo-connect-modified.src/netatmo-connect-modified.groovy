@@ -20,7 +20,7 @@ private getOriginalDeviceId(String deviceId) { return deviceId.replaceAll(/\.clo
 
 // Automatically generated. Make future change here.
 definition(
-	name: "Netatmo (Connect) Modified With Extra CO2 device",
+	name: "Netatmo (Connect) Modified With Extra CO2/Noise devices",
 	namespace: "cscheiene",
 	author: "Brian Steere,cscheiene,Vanya Davidenko",
 	description: "Netatmo Integration",
@@ -348,9 +348,11 @@ def initialize() {
 				case 'NAMain':
 					log.debug "Creating Base station, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					knownChildren.add(createChildDevice("Netatmo Basestation", deviceId, "${detail.type}.${deviceId} Temp", detail.module_name))
-					if (settings.addExtraVirtualCo2Devices) {
+					if (settings.addExtraVirtualCo2Device) {
 						knownChildren.add(createChildDevice("Netatmo Basestation CO2", "${deviceId}.clone.co2", "${detail.type}.${deviceId} CO2", detail.module_name))
-//					    knownChildren.add(createChildDevice("Netatmo Basestation Pressure", "${deviceId}.clone.pressure", "${detail.type}.${deviceId} Pressure", detail.module_name))
+					}
+					if (settings.addExtraVirtualNoiseDevice) {
+					    knownChildren.add(createChildDevice("Netatmo Basestation Noise", "${deviceId}.clone.noise", "${detail.type}.${deviceId} Noise", detail.module_name))
 					}
 					break
 				case 'NAModule1':
@@ -364,7 +366,7 @@ def initialize() {
 				case 'NAModule4':
 					log.debug "Creating Additional module, DeviceID: ${deviceId} Device name: ${detail.module_name}"
 					knownChildren.add(createChildDevice("Netatmo Additional Module", "${deviceId}", "${detail.type}.${deviceId}", detail.module_name))
-					if (settings.addExtraVirtualCo2Devices) {
+					if (settings.addExtraVirtualCo2Device) {
 						knownChildren.add(createChildDevice("Netatmo Additional Module CO2", "${deviceId}.clone.co2", "${detail.type}.${deviceId} CO2", detail.module_name))
 					}
 					break
@@ -495,7 +497,8 @@ def listDevices() {
             input "windUnits", "enum", title: "Wind Units", description: "Please select wind units", required: true, options: [kph:'kph', ms:'ms', mph:'mph', kts:'kts']
             input "time", "enum", title: "Time Format", description: "Please select time format", required: true, options: [12:'12 Hour', 24:'24 Hour']
             input "sound", "number", title: "Sound Sensor: \nEnter the value when sound will be marked as detected", description: "Please enter number", required: false
-            input "addExtraVirtualCo2Devices", "bool", title: "Add extra virtual devices with CO2 as primary control", required: false
+            input "addExtraVirtualCo2Device", "bool", title: "Add extra virtual device with CO2 as primary control", required: false
+            input "addExtraVirtualNoiseDevice", "bool", title: "Add extra virtual device with Sound Pressure as primary control", required: false
         }
 	}
 }
@@ -558,6 +561,7 @@ def poll() {
                 child?.sendEvent(name: 'pressure', value: (pressToPref(data['Pressure'])).toDouble().trunc(2), unit: settings.pressUnits)
 				child?.sendEvent(name: 'soundPressureLevel', value: data['Noise'], unit: "db")
                 child?.sendEvent(name: 'sound', value: noiseTosound(data['Noise']))
+                child?.sendEvent(name: 'energy', value: data['Noise'])  // SmartRules hack
                 child?.sendEvent(name: 'pressure_trend', value: data['pressure_trend'], unit: "")
                 child?.sendEvent(name: 'min_temp', value: cToPref(data['min_temp']) as float, unit: getTemperatureScale())
                 child?.sendEvent(name: 'max_temp', value: cToPref(data['max_temp']) as float, unit: getTemperatureScale())

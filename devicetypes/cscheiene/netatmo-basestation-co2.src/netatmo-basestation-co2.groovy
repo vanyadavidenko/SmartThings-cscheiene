@@ -25,6 +25,7 @@ metadata {
         capability "Carbon Dioxide Measurement"
         capability "Sound Pressure Level"
         capability "Sound Sensor"
+        capability "Energy Meter"  // hack for SmartRules
 
         attribute "min_temp", "number"
         attribute "max_temp", "number"
