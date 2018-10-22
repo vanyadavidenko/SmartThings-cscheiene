@@ -135,7 +135,7 @@ metadata {
             state "default", label: '${currentValue}'
         }
         valueTile("soundPressureLevel", "device.soundPressureLevel", width: 2, height: 1, inactiveLabel: false) {
-            state "soundPressureLevel", label: '${currentValue}db'
+            state "soundPressureLevel", label: '${currentValue} db'
         }
         standardTile("sound", "device.sound", width: 2, height: 1, inactiveLabel: false) {
             state "not detected", label: 'Quiet', icon: "st.Entertainment.entertainment15"

@@ -44,7 +44,7 @@ metadata {
 // CO2-DTH SHARED CODE
         multiAttributeTile(name: "main", type: "generic", width: 6, height: 4) {
             tileAttribute("carbonDioxide", key: "PRIMARY_CONTROL") {
-                attributeState "carbonDioxide", label: '${currentValue}ppm', icon:"st.Outdoor.outdoor3", backgroundColors: [
+                attributeState "carbonDioxide", label: '${currentValue} ppm', icon:"st.Outdoor.outdoor3", backgroundColors: [
                     [value: 750, color: "#44B621"],
                     [value: 1000, color: "#ffcc00"],
                     [value: 1500, color: "#e86d13"]
@@ -103,7 +103,7 @@ metadata {
 
 // PARTIALLY SHARED CODE
         valueTile("carbonDioxide", "device.carbonDioxide", width: 2, height: 2, inactiveLabel: false) {
-            state "carbonDioxide", label: '${currentValue}ppm', backgroundColors: [
+            state "carbonDioxide", label: '${currentValue} ppm', backgroundColors: [
                 [value: 750, color: "#44B621"],
                 [value: 1000, color: "#ffcc00"],
                 [value: 1500, color: "#e86d13"]

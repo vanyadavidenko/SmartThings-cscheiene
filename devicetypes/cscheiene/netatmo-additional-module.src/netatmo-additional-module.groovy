@@ -61,7 +61,7 @@ metadata {
                 ]
             }
             tileAttribute("carbonDioxide", key: "SECONDARY_CONTROL") {
-                attributeState "carbonDioxide", label: 'CO2: ${currentValue}ppm'
+                attributeState "carbonDioxide", label: 'CO2: ${currentValue} ppm'
             }
             tileAttribute("humidity", key: "SECONDARY_CONTROL") {
                 attributeState "humidity", label: '                                                     Humidity: ${currentValue}%'
@@ -113,7 +113,7 @@ metadata {
 
 // PARTIALLY SHARED CODE
         valueTile("carbonDioxide", "device.carbonDioxide", width: 2, height: 2, inactiveLabel: false) {
-            state "carbonDioxide", label: '${currentValue}ppm', backgroundColors: [
+            state "carbonDioxide", label: '${currentValue} ppm', backgroundColors: [
                 [value: 750, color: "#44B621"],
                 [value: 1000, color: "#ffcc00"],
                 [value: 1500, color: "#e86d13"]
